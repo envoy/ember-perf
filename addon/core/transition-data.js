@@ -1,4 +1,5 @@
 import { create as emberCreate } from '@ember/polyfills';
+import { assert } from '@ember/debug';
 import performanceNow from '../utils/performance-now';
 import RenderData from './render-data';
 
@@ -18,7 +19,7 @@ function t() {
   return performanceNow();
 }
 
-let prototype = TransitionData.prototype = create(RenderData.prototype);
+let prototype = (TransitionData.prototype = create(RenderData.prototype));
 prototype.constructor = TransitionData;
 prototype._super$constructor = RenderData;
 
@@ -38,7 +39,10 @@ prototype.activateRoute = function activateRoute(route) {
 
 prototype.routeFinishedSetup = function routeFinishedSetup(route) {
   let endTime = t();
-  let [r] = this.routes.filter((r) => r.name === route.routeName);
+  let [r] = this.routes.filter(r => r.name === route.routeName);
+  let assertMessage =
+    'setupController did not fire for this route. Please make sure to call `this._super(...arguments) in setupController so `ember-perf` can initialize.';
+  assert(assertMessage, r);
   r.endTime = endTime;
   r.elapsedTime = r.endTime - r.startTime;
 };
